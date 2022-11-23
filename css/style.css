@@ -1,0 +1,28 @@
+body {
+    background: rgba(46, 46, 46, 0.952);
+    color: white;
+}
+
+h1 {
+    text-align: center;
+}
+
+.show{
+    background-color: black;
+}
+.hide{
+   background-color: antiquewhite;
+}
+td {
+   background-color: aqua;
+    width: 70px;
+    height: 70px;
+}
+
+table {
+    /* border-spacing: 10px; */
+    width: 300px;
+    height: 300px;
+    margin: auto;
+}
+
