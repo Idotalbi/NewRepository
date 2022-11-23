@@ -1,28 +1,31 @@
 body {
     background: rgba(46, 46, 46, 0.952);
     color: white;
-}
-
-h1 {
     text-align: center;
 }
+button{
+    width: 60px;
+    height: 60px;
+    margin-bottom: 50px;
+    border-radius: 50%;
+}
 
-.show{
-    background-color: black;
+button:hover{
+    cursor: pointer;
 }
-.hide{
-   background-color: antiquewhite;
+
+.cell{
+color: blue;
+font-size:30px;
 }
+
 td {
    background-color: aqua;
-    width: 70px;
-    height: 70px;
+    width:50px;
+    height:50px;
 }
 
 table {
-    /* border-spacing: 10px; */
-    width: 300px;
-    height: 300px;
     margin: auto;
 }
 

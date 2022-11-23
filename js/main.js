@@ -3,14 +3,18 @@
 
 const MOKESH = '💣'
 const FLOOR = ''
+const FLAG = '🚩'
 
+var gTime
+var gStartTime
+var gInterval
 var gBoard
+
 var gLevel = {
     SIZE: 4,
     MINES: 2
 }
 
-// console.log('gLevel.SIZE:', gLevel.SIZE)
 var gGame = {
     isOn: false,
     shownCount: 0,
@@ -20,74 +24,25 @@ var gGame = {
 
 
 function onInit() {
-    gBoard = buildBoard()
+    if (gInterval) clearInterval(gInterval)
+    gBoard = buildBoard(gLevel.SIZE)
     renderBoard(gBoard)
+    resetTime()
 
-}
-
-
-function buildBoard() {
-    var size = gLevel.SIZE
-    const board = []
-    for (var i = 0; i < size; i++) {
-        board[i] = []
-        for (var j = 0; j < size; j++) {
-            board[i][j] = createCell()
-        }
-
-    }
-     setMinesNegsCount(board)
-    return board
-}
-
-function createCell() {
-    const cell = {
-        minesAroundCount: 0,
-        isShown: false,
-        isMine: false,
-        isMarked: false
-    }
-    return cell
-}
-
-function renderBoard(board,selector) {
-    var strHTML = '<table><tbody>'
-    for (var i = 0; i <board.length; i++) {
-        strHTML += '<tr>'
-        for (var j = 0; j < board[0].length; j++) {
-            var cell = board[i][j]
-            var str
-            var className=`cell cell${i}-${j}`
-            if (cell.isShown === true) {
-                str = (cell.isMine) ? MOKESH : cell.minesAroundCount
-                if (!cell.minesAroundCount) str = FLOOR
-
-            } else {
-                str = FLOOR
-            }
-
-            strHTML += `<td class"${className}" onclick="onCellClicked(this, ${i},${j})" >${str}</td>`
-
-        }
-        strHTML += '</tr>'
-    }
-    strHTML += '</table></tbody>'
-    const elBoard = document.querySelector('.board-game')
-    elBoard.innerHTML = strHTML
 }
 
 function setMinesNegsCount(board) {
     for (var i = 0; i < board.length; i++) {
-        for (var j = 0; j < board.length; j++) {
-            const cell=board[i][j]
-            if (cell.isMine) continue
-            cell.minesAroundCount = countMokeshAround(board,i,j)
+        for (var j = 0; j < board[0].length; j++) {
+            const cell = board[i][j]
+            if (!cell.isMine) {
+                cell.minesAroundCount = countMokeshAround(board, i, j)
+            }
         }
     }
-
 }
 
-function countMokeshAround(board,cellI,cellJ) {
+function countMokeshAround(board, cellI, cellJ) {
     var neighborsCount = 0
     for (var i = cellI - 1; i <= cellI + 1; i++) {
         if (i < 0 || i >= board.length) continue
@@ -97,27 +52,90 @@ function countMokeshAround(board,cellI,cellJ) {
             if (board[i][j].isMine) neighborsCount++
         }
     }
+    console.log('count:', neighborsCount)
     return neighborsCount
 }
 
-console.log('count:', neighborsCount)
 
 
-function onCellClicked(elCell, i, j) {
-    var str
-    if (gBoard[i][j].isMine) {
-        str = MOKESH
-    } else {
-        str = gBoard[i][j].minesAroundCount
-        if (str === 0) {
-            str = FLOOR
-        }
+function onCellClicked(elCell) {
+
+    var location = {
+        i: elCell.dataset.i,
+        j: elCell.dataset.j
     }
-    gBoard[i][j].isShown = true
-    elCell.classList.add="show"
-    elCell.innertext=str
-    // elCell.innerHTML = cell.minesAroundCount
-    // elCell.classList.replace('hide', 'show')
+    const cell = gBoard[location.i][location.j]
+    cell.isShown = true
+    renderCell(location)
+    startTimer()
+}
+
+
+function restart() {
+    resetTime()
+    onInit()
+}
+
+function startTimer() {
+    gStartTime = Date.now()
+    gInterval = setInterval(() => {
+        const seconds = (Date.now() - gStartTime) / 1000
+        var elH2 = document.querySelector('.time')
+        elH2.innerText = seconds.toFixed(3)
+
+    }, 1);
+}
+
+function resetTime() {
+    var elH2 = document.querySelector('.time')
+    elH2.innerText = '0.000'
+}
+
+function changeLevel(level) {
+    if (level === 'easy') {
+        gLevel.SIZE = 6
+        gLevel.MINES = 5
+        gBoard = buildBoard(gLevel.SIZE)
+        renderBoard(gBoard)
+    }
+
+    if (level === 'medium') {
+        gLevel.SIZE = 8
+        gLevel.MINES = 9
+        gBoard = buildBoard(gLevel.SIZE)
+        renderBoard(gBoard)
+
+    }
+    if (level === 'hard') {
+        gLevel.SIZE = 10
+        gLevel.MINES = 20
+        gBoard = buildBoard(gLevel.SIZE)
+        renderBoard(gBoard)
+    }
+
+    // onInit(gLevel.SIZE)
 
 }
 
+function victory() {
+
+}
+
+function cellMarked(elFlag, location) {
+    var location = {
+        i: elFlag.dataset.i,
+        j: elFlag.dataset.j
+    }
+    const cell = gBoard[location.i][location.j]
+    if (cell.isShown) {
+        return
+    }
+    if (cell.isMarked === false) {
+        elFlag.innerText = FLAG
+    }
+    if (cell.isMarked){
+        elFlag.innerText = ''
+    }
+    cell.isMarked=!cell.isMarked
+
+}
