@@ -34,35 +34,32 @@ function buildBoard() {
         for (var j = 0; j < size; j++) {
             board[i][j] = createCell()
         }
+
     }
-    // console.table(board)
-    board[0][0] = MOKESH
-    board[0][1] = MOKESH
-    // board = setMinesNegsCount(board)
+     setMinesNegsCount(board)
     return board
 }
 
 function createCell() {
     const cell = {
         minesAroundCount: 0,
-        isShown: true,
-        isMine: true,
-        isMarked: true
+        isShown: false,
+        isMine: false,
+        isMarked: false
     }
     return cell
 }
 
-function renderBoard(board) {
-    var size = gLevel.SIZE
+function renderBoard(board,selector) {
     var strHTML = '<table><tbody>'
-    for (var i = 0; i < size; i++) {
+    for (var i = 0; i <board.length; i++) {
         strHTML += '<tr>'
-        for (var j = 0; j < size; j++) {
+        for (var j = 0; j < board[0].length; j++) {
             var cell = board[i][j]
             var str
-            var className
+            var className=`cell cell${i}-${j}`
             if (cell.isShown === true) {
-                str = cell.isMine ? MOKESH : cell.minesAroundCount
+                str = (cell.isMine) ? MOKESH : cell.minesAroundCount
                 if (!cell.minesAroundCount) str = FLOOR
 
             } else {
@@ -82,29 +79,28 @@ function renderBoard(board) {
 function setMinesNegsCount(board) {
     for (var i = 0; i < board.length; i++) {
         for (var j = 0; j < board.length; j++) {
-            const pos = { i, j }
-            if (board[i][j].isMine) continue
-            board[i][j].minesAroundCount = countMokeshAround(board, pos)
+            const cell=board[i][j]
+            if (cell.isMine) continue
+            cell.minesAroundCount = countMokeshAround(board,i,j)
         }
     }
-    return board
 
 }
 
-function countMokeshAround(board, pos) {
-    var count = 0
-    for (var i = pos.i - 1; i <= pos.i + 1; i++) {
+function countMokeshAround(board,cellI,cellJ) {
+    var neighborsCount = 0
+    for (var i = cellI - 1; i <= cellI + 1; i++) {
         if (i < 0 || i >= board.length) continue
-        for (var j = pos.j - 1; j <= pos.j + 1; j++) {
-            if (i === pos.i && j === pos.j) continue
-            if (j < 0 || j >= board[0].length) continue
-            if (board[i][j].isMine) count++
+        for (var j = cellJ - 1; j <= cellJ + 1; j++) {
+            if (i === cellI && j === cellJ) continue
+            if (j < 0 || j >= board[i].length) continue
+            if (board[i][j].isMine) neighborsCount++
         }
     }
-    return count
+    return neighborsCount
 }
 
-console.log('count:', count)
+console.log('count:', neighborsCount)
 
 
 function onCellClicked(elCell, i, j) {
