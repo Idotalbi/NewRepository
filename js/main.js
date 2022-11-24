@@ -4,27 +4,31 @@
 const MOKESH = '💣'
 const FLOOR = ''
 const FLAG = '🚩'
+const LIFE = '❤️'
 
 var gTime
 var gStartTime
 var gInterval
 var gBoard
-
-var gLevel = {
-    SIZE: 4,
-    MINES: 2
-}
-
+var gLevel
 var gGame = {
-    isOn: false,
+    isOn: true,
     shownCount: 0,
     markedCount: 0,
     secsPassed: 0
 }
 
+ gLevel = {
+    SIZE: 4,
+    MINES: 2,
+    LIFE:1
+}
+
 
 function onInit() {
     if (gInterval) clearInterval(gInterval)
+    gGame.markedCount = 0
+    gGame.shownCount = 0
     gBoard = buildBoard(gLevel.SIZE)
     renderBoard(gBoard)
     resetTime()
@@ -59,19 +63,45 @@ function countMokeshAround(board, cellI, cellJ) {
 
 
 function onCellClicked(elCell) {
-
+    // if (cell.isMarked) return
+    if (!gGame.isOn) return
     var location = {
         i: elCell.dataset.i,
         j: elCell.dataset.j
     }
+    if (gGame.shownCount === 0) {
+        startTimer()
+
+    }
     const cell = gBoard[location.i][location.j]
+    if (cell.isMarked) return
+    if (cell.isShown) return
     cell.isShown = true
+    gGame.shownCount++
+    console.log('gGame.shownCount:', gGame.shownCount)
     renderCell(location)
-    startTimer()
+
+    if (cell.isMine) {
+        if (gLevel.LIFE > 0)
+            gLevel.LIFE--
+            createLife()
+
+            if (gInterval) clearInterval(gInterval)
+            gameOver()
+    }
+
+    if (gGame.isShown === (gLevel.SIZE ** 2 - gGame.markedCount)) {
+        victory()
+    }
+
+
 }
 
 
 function restart() {
+    gGame.isOn = true
+    var elSmile = document.querySelector('.smile')
+    elSmile.innerText = '😊'
     resetTime()
     onInit()
 }
@@ -92,36 +122,54 @@ function resetTime() {
 }
 
 function changeLevel(level) {
+
     if (level === 'easy') {
         gLevel.SIZE = 6
         gLevel.MINES = 5
-        gBoard = buildBoard(gLevel.SIZE)
-        renderBoard(gBoard)
+        gLevel.LIFE=2
     }
 
     if (level === 'medium') {
         gLevel.SIZE = 8
         gLevel.MINES = 9
-        gBoard = buildBoard(gLevel.SIZE)
-        renderBoard(gBoard)
-
+        gLevel.LIFE= 3
+       
     }
     if (level === 'hard') {
         gLevel.SIZE = 10
         gLevel.MINES = 20
-        gBoard = buildBoard(gLevel.SIZE)
-        renderBoard(gBoard)
+        gLevel.LIFE = 5
     }
+    gBoard = buildBoard()
+    renderBoard(gBoard)
+    createLife()
+  
 
-    // onInit(gLevel.SIZE)
+}
 
+function createLife(){
+    const elLife=document.querySelector('.life span')
+    elLife.innerText=LIFE.repeat (gLevel.LIFE)
 }
 
 function victory() {
+    gGame.isOn = false
+    var elSmile = document.querySelector('.smile')
+    elSmile.innerText = '🤩'
+}
+
+function gameOver() {
+    gGame.isOn = false
+    var elSmile = document.querySelector('.smile')
+    elSmile.innerText = '😵'
 
 }
 
+
+
+
 function cellMarked(elFlag, location) {
+    if (!gGame.isOn) return
     var location = {
         i: elFlag.dataset.i,
         j: elFlag.dataset.j
@@ -132,10 +180,14 @@ function cellMarked(elFlag, location) {
     }
     if (cell.isMarked === false) {
         elFlag.innerText = FLAG
+        gGame.markedCount++
     }
-    if (cell.isMarked){
+    if (cell.isMarked) {
         elFlag.innerText = ''
+        gGame.markedCount--
     }
-    cell.isMarked=!cell.isMarked
+    console.log(' gGame.markedCount:', gGame.markedCount)
+
+    cell.isMarked = !cell.isMarked
 
 }
