@@ -1,3 +1,4 @@
+'use strict'
 
 function buildBoard() {
     var size = gLevel.SIZE
