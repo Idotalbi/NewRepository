@@ -18,10 +18,10 @@ var gGame = {
     secsPassed: 0
 }
 
- gLevel = {
+gLevel = {
     SIZE: 4,
     MINES: 2,
-    LIFE:1
+    LIFE: 1
 }
 
 
@@ -31,7 +31,7 @@ function onInit() {
     gGame.shownCount = 0
     gBoard = buildBoard(gLevel.SIZE)
     renderBoard(gBoard)
-    resetTime()
+    // resetTime()
 
 }
 
@@ -69,11 +69,12 @@ function onCellClicked(elCell) {
         i: elCell.dataset.i,
         j: elCell.dataset.j
     }
+    const cell = gBoard[location.i][location.j]
+
+
     if (gGame.shownCount === 0) {
         startTimer()
-
     }
-    const cell = gBoard[location.i][location.j]
     if (cell.isMarked) return
     if (cell.isShown) return
     cell.isShown = true
@@ -81,21 +82,29 @@ function onCellClicked(elCell) {
     console.log('gGame.shownCount:', gGame.shownCount)
     renderCell(location)
 
+
     if (cell.isMine) {
         if (gLevel.LIFE > 0)
             gLevel.LIFE--
-            createLife()
-
+        createLife()
+        if (gLevel.LIFE === 0) {
             if (gInterval) clearInterval(gInterval)
             gameOver()
+        }
     }
+    // if (!cell.minesAroundCount) expandShown(cell)
+    
 
-    if (gGame.isShown === (gLevel.SIZE ** 2 - gGame.markedCount)) {
-        victory()
-    }
-
-
+    checkGameOver()
 }
+
+
+
+
+function checkGameOver() {
+    if (gGame.shownCount === (gLevel.SIZE ** 2) - gLevel.MINES && gGame.markedCount === gLevel.MINES) victory()
+}
+
 
 
 function restart() {
@@ -126,36 +135,37 @@ function changeLevel(level) {
     if (level === 'easy') {
         gLevel.SIZE = 6
         gLevel.MINES = 5
-        gLevel.LIFE=2
+        gLevel.LIFE = 2
     }
 
     if (level === 'medium') {
         gLevel.SIZE = 8
         gLevel.MINES = 9
-        gLevel.LIFE= 3
-       
+        gLevel.LIFE = 3
+
     }
     if (level === 'hard') {
         gLevel.SIZE = 10
         gLevel.MINES = 20
         gLevel.LIFE = 5
     }
+    createLife()
     gBoard = buildBoard()
     renderBoard(gBoard)
-    createLife()
-  
+
 
 }
 
-function createLife(){
-    const elLife=document.querySelector('.life span')
-    elLife.innerText=LIFE.repeat (gLevel.LIFE)
+function createLife() {
+    const elLife = document.querySelector('.life span')
+    elLife.innerText = LIFE.repeat(gLevel.LIFE)
 }
 
 function victory() {
     gGame.isOn = false
     var elSmile = document.querySelector('.smile')
     elSmile.innerText = '🤩'
+    if (gInterval) clearInterval(gInterval)
 }
 
 function gameOver() {
@@ -191,3 +201,40 @@ function cellMarked(elFlag, location) {
     cell.isMarked = !cell.isMarked
 
 }
+expandShown(gBoard, i, j)
+function expandShown(board, i, j) {
+    var location = countMokeshAround(board, i, j)
+    for (var i = 0; i < location.length; i++) {
+        const neighborsLocation = location[i]
+        const neighborsCell = board[location.i][location.j]
+        shown(neighborsLocation)
+        gGame.shownCount++
+        neighborsCell.isShown = true
+        renderCell(neighborsLocation)
+
+        console.log('neighborsCell.minesAroundCount:', neighborsCell)
+        
+        if (neighborsCell.minesAroundCount === 0) {
+            neighborsCell.innerText = ''
+            expandShown(board, i, j)
+        } else {
+            neighborsCell.innerText = neighborsCell.minesAroundCount
+
+        }
+
+    }
+}
+
+function shown() {
+    var elCurrCell = document.querySelector(`.cell-${i}-${j},`)
+    elCurrCell.classList.add('shown')
+
+}
+
+
+
+
+
+
+
+

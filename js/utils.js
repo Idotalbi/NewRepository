@@ -13,7 +13,6 @@ function buildBoard() {
         const idxI = getRandomInt(0, gLevel.SIZE)
         const idxJ = getRandomInt(0, gLevel.SIZE)
         board[idxI][idxJ].isMine = true
-
     }
     setMinesNegsCount(board)
     return board
@@ -40,10 +39,10 @@ function renderBoard(board, selector) {
 
             if (cell.isShown) {
                 str = (cell.isMine) ? MOKESH : cell.minesAroundCount
-                if (!cell.minesAroundCount) str = FLOOR
-
+                if (!cell.minesAroundCount) str = ''
+                console.log(cell.minesAroundCount)
             } else {
-                str = FLOOR
+                str = ''
             }
 
             strHTML += `<td class="${className}" onclick="onCellClicked(this)"oncontextmenu=" cellMarked(this)" data-i="${i}" data-j="${j}">${str}</td>`
