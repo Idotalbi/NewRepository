@@ -38,9 +38,13 @@ function renderBoard(board, selector) {
             var className = `cell cell-${i}-${j}`
 
             if (cell.isShown) {
-                str = (cell.isMine) ? MOKESH : cell.minesAroundCount
-                if (!cell.minesAroundCount) str = ''
-                console.log(cell.minesAroundCount)
+                if (cell.isMine) {
+                    str = MINE
+                }
+                else if (cell.minesAroundCount) {
+                    str = cell.minesAroundCount
+                }
+                else str = ''
             } else {
                 str = ''
             }
@@ -60,10 +64,15 @@ function renderCell(location) {
     var str
     const cell = gBoard[location.i][location.j]
     if (cell.isShown) {
-        str = (cell.isMine) ? MOKESH : cell.minesAroundCount
+        if (cell.isShown) {
+            if (cell.isMine) str = MINE
+            else if (cell.minesAroundCount) str = cell.minesAroundCount
+            else str = ''
+        }
     }
     const elCell = document.querySelector(`.cell-${location.i}-${location.j}`)
     elCell.innerText = str
+    elCell.style.backgroundColor='lightGrey'
 }
 
 function getRandomInt(min, max) {

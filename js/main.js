@@ -1,7 +1,7 @@
 'use strict'
 
 
-const MOKESH = '💣'
+const MINE = '💣'
 const FLOOR = ''
 const FLAG = '🚩'
 const LIFE = '❤️'
@@ -12,7 +12,7 @@ var gInterval
 var gBoard
 var gLevel
 var gGame = {
-    isOn: true,
+    isOn: false,
     shownCount: 0,
     markedCount: 0,
     secsPassed: 0
@@ -21,18 +21,20 @@ var gGame = {
 gLevel = {
     SIZE: 4,
     MINES: 2,
-    LIFE: 1
+    LIFE: 2
 }
 
 
 function onInit() {
     if (gInterval) clearInterval(gInterval)
+    gGame.isOn=true
+    createLife(gLevel.LIFE)
     gGame.markedCount = 0
     gGame.shownCount = 0
     gBoard = buildBoard(gLevel.SIZE)
     renderBoard(gBoard)
     // resetTime()
-
+    
 }
 
 function setMinesNegsCount(board) {
@@ -56,44 +58,47 @@ function countMokeshAround(board, cellI, cellJ) {
             if (board[i][j].isMine) neighborsCount++
         }
     }
-    console.log('count:', neighborsCount)
+    // console.log('count:', neighborsCount)
     return neighborsCount
 }
 
 
 
 function onCellClicked(elCell) {
-    // if (cell.isMarked) return
-    if (!gGame.isOn) return
-    var location = {
-        i: elCell.dataset.i,
-        j: elCell.dataset.j
-    }
-    const cell = gBoard[location.i][location.j]
-
-
-    if (gGame.shownCount === 0) {
-        startTimer()
-    }
-    if (cell.isMarked) return
-    if (cell.isShown) return
-    cell.isShown = true
-    gGame.shownCount++
-    console.log('gGame.shownCount:', gGame.shownCount)
-    renderCell(location)
-
-
-    if (cell.isMine) {
-        if (gLevel.LIFE > 0)
-            gLevel.LIFE--
-        createLife()
-        if (gLevel.LIFE === 0) {
-            if (gInterval) clearInterval(gInterval)
-            gameOver()
-        }
-    }
-    // if (!cell.minesAroundCount) expandShown(cell)
+    if (gGame.isOn){
     
+        
+        var location = {
+            i: elCell.dataset.i,
+            j: elCell.dataset.j
+        }
+        const cell = gBoard[location.i][location.j]
+        
+        
+        if (gGame.shownCount === 0) {
+            startTimer()
+        }
+        if (cell.isMarked) return
+        if (cell.isShown) return
+        cell.isShown = true
+        gGame.shownCount++
+        // console.log('gGame.shownCount:', gGame.shownCount)
+        renderCell(location)
+        
+        
+        if (cell.isMine) {
+            if (gLevel.LIFE > 0)
+            gLevel.LIFE--
+            createLife()
+            checkGameOver() 
+            
+            if (gLevel.LIFE === 0) {
+                if (gInterval) clearInterval(gInterval)
+                gameOver()
+            }
+        }
+        
+    }
 
     checkGameOver()
 }
@@ -108,7 +113,7 @@ function checkGameOver() {
 
 
 function restart() {
-    gGame.isOn = true
+    createLife(gLevel.LIFE)
     var elSmile = document.querySelector('.smile')
     elSmile.innerText = '😊'
     resetTime()
@@ -169,6 +174,7 @@ function victory() {
 }
 
 function gameOver() {
+    gLevel.LIFE++
     gGame.isOn = false
     var elSmile = document.querySelector('.smile')
     elSmile.innerText = '😵'
@@ -201,35 +207,37 @@ function cellMarked(elFlag, location) {
     cell.isMarked = !cell.isMarked
 
 }
-expandShown(gBoard, i, j)
-function expandShown(board, i, j) {
-    var location = countMokeshAround(board, i, j)
-    for (var i = 0; i < location.length; i++) {
-        const neighborsLocation = location[i]
-        const neighborsCell = board[location.i][location.j]
-        shown(neighborsLocation)
-        gGame.shownCount++
-        neighborsCell.isShown = true
-        renderCell(neighborsLocation)
 
-        console.log('neighborsCell.minesAroundCount:', neighborsCell)
+
+// expandShown(gBoard, i, j)
+// function expandShown(board, i, j) {
+//     var location = countMokeshAround(board, i, j)
+//     for (var i = 0; i < location.length; i++) {
+//         const neighborsLocation = location[i]
+//         const neighborsCell = board[location.i][location.j]
+//         shown(neighborsLocation)
+//         gGame.shownCount++
+//         neighborsCell.isShown = true
+//         renderCell(neighborsLocation)
+
+//         console.log('neighborsCell.minesAroundCount:', neighborsCell)
         
-        if (neighborsCell.minesAroundCount === 0) {
-            neighborsCell.innerText = ''
-            expandShown(board, i, j)
-        } else {
-            neighborsCell.innerText = neighborsCell.minesAroundCount
+//         if (neighborsCell.minesAroundCount === 0) {
+//             neighborsCell.innerText = ''
+//             expandShown(board, i, j)
+//         } else {
+//             neighborsCell.innerText = neighborsCell.minesAroundCount
 
-        }
+//         }
 
-    }
-}
+//     }
+// }
 
-function shown() {
-    var elCurrCell = document.querySelector(`.cell-${i}-${j},`)
-    elCurrCell.classList.add('shown')
+// function shown() {
+//     var elCurrCell = document.querySelector(`.cell-${i}-${j},`)
+//     elCurrCell.classList.add('shown')
 
-}
+// }
 
 
 
